@@ -1,0 +1,15 @@
+env: local
+
+Server: 
+  addr: localhost:8080
+  timeout: 4s
+  idletimeout: 30s
+
+Postgres: 
+  connString: "host=localhost port=32771 user=postgres password=123456QWERTASDFZXC dbname=Notes sslmode=disable"
+
+Redis:
+
+
+Kafka:
+ connString: "localhost:9092"
