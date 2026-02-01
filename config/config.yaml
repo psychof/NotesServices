@@ -6,7 +6,7 @@ Server:
   idletimeout: 30s
 
 Postgres: 
-  connString: "host=localhost port=32771 user=postgres password=123456QWERTASDFZXC dbname=Notes sslmode=disable"
+  connString: "host=localhost port=32768 user=postgres password=123456QWERTASDFZXC dbname=notes sslmode=disable"
 
 Redis:
 

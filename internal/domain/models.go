@@ -1,9 +1,7 @@
 package domain
 
-import "time"
-
 type Notes struct {
-	Title      string     `json:"Title"`
-	Text       string     `json:"Text"`
-	Time_stamp *time.Time `json:"timeStemp"`
+	Title     string `validate:"required" json:"Title"`
+	Text      string `validate:"required" json:"Text"`
+	Time_zone string `validate:"required" json:"timeZone"`
 }

@@ -28,27 +28,26 @@ func main() {
 	storage, err := storage.New(ctx, config.Database.ConnString)
 
 	if err != nil {
-		logger.Error("Error setup database%s", err)
+		logger.Error("Error setup database:", slog.Any("", err))
 	}
-	r := handler.Handlers()
+
+	services := services.New(logger, storage, storage)
+
+	handlers := handler.NewHandlers(services)
+
+	r := handlers.SetupRouter()
 
 	s := http.Server{
+		Addr:         config.Server.Addr,
 		WriteTimeout: config.Server.TimeOut,
 		ReadTimeout:  config.Server.TimeOut,
 		IdleTimeout:  config.Server.IdleTime,
 		Handler:      r,
 	}
 
-	_ = services.New(logger, storage, storage)
-
 	if err := s.ListenAndServe(); err != nil {
 		logger.Error("Error starting server")
 	}
-
-	logger.Info("Server started")
-
-	fmt.Print(config)
-
 }
 
 func SetupLoger(env string) *slog.Logger {
@@ -57,13 +56,13 @@ func SetupLoger(env string) *slog.Logger {
 
 	switch env {
 	case "local":
-		l = slog.New(slog.NewJSONHandler(os.Stdin, &slog.HandlerOptions{Level: slog.LevelDebug}))
+		l = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 
 	case "dev":
-		l = slog.New(slog.NewJSONHandler(os.Stdin, &slog.HandlerOptions{Level: slog.LevelDebug}))
+		l = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 
 	case "prod":
-		l = slog.New(slog.NewTextHandler(os.Stdin, &slog.HandlerOptions{Level: slog.LevelInfo}))
+		l = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	}
 
 	return l

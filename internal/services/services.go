@@ -18,18 +18,18 @@ type Services struct {
 }
 
 type NotesSaver interface {
-	AddNotes(ctx context.Context, title string, text string, timeStemp *time.Time) error
+	AddNotes(ctx context.Context, title string, text string, timeStemp *time.Time) (int64, error)
 }
 
 type NoteRemover interface {
-
+	RemoveNotes(ctx context.Context, note_id int64, user_id int64) error
 }
 
 func New(logger *slog.Logger, NotesSaver NotesSaver, NoteRemover NoteRemover) *Services {
 	return &Services{Logger: logger, NotesSaver: NotesSaver, NoteRemover: NoteRemover}
 }
 
-func(s *Services) AddNotes(c echo.Context) error {
+func (s *Services) AddNotes(c echo.Context) error {
 
 	notes := &domain.Notes{}
 
@@ -42,14 +42,33 @@ func(s *Services) AddNotes(c echo.Context) error {
 	}
 
 	if err := c.Validate(notes); err != nil {
-		return c.JSON(http.StatusBadGateway, "Bed credentinals")
+		return c.JSON(http.StatusBadRequest, "Bed credentinals")
 	}
 
-	err = s.NotesSaver.AddNotes(c.Request().Context(), notes.Title, notes.Text, notes.Time_stamp)
+	timeLocation, err := time.LoadLocation(notes.Time_zone)
 
 	if err != nil {
+		return c.JSON(http.StatusBadRequest, "Error parse timezone")
+	}
+
+	time := time.Now().In(timeLocation)
+
+	_, err = s.NotesSaver.AddNotes(c.Request().Context(), notes.Title, notes.Text, &time)
+
+	if err != nil {
+		s.Logger.Error("Error add notes to database:", slog.Any("", err))
 		return c.JSON(http.StatusInternalServerError, "Error paste data to database")
 	}
+
+	return nil
+}
+
+func (s *Services) RemoveNotes(c echo.Context) error {
+
+	id := c.Param("id")
+
+	
+
 
 	return nil
 }

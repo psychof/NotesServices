@@ -2,18 +2,32 @@ package handler
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/psychof/NotesServices/internal/pkg"
 	"github.com/psychof/NotesServices/internal/services"
 )
 
-func Handlers() *echo.Echo {
+type Handlers struct {
+	Services *services.Services
+}
+
+func NewHandlers(services *services.Services) *Handlers {
+	return &Handlers{Services: services}
+}
+
+func (s *Handlers) SetupRouter() *echo.Echo {
+
 	r := echo.New()
+	r.Validator = pkg.New()
 
-	r.Validator = echo.New().Validator
+	return s.SetupRoutes(r)
 
-	r.POST("/notes", ) 
+}
 
-	r.GET("/notes/:id",)
+func(s *Handlers) SetupRoutes(r *echo.Echo) *echo.Echo {
 	
-
-	return r
+	r.POST("/notes",s.Services.AddNotes)
+	r.GET("/notes/:id",s.Services.RemoveNotes)
+	
+ 
+	return r 
 }
